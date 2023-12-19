@@ -95,14 +95,6 @@ class MyModel(pl.LightningModule):
 
 class focal_loss(nn.Module):
     def __init__(self, alpha=0.1, gamma=2, num_classes=2, size_average=False):
-        """
-        focal_loss损失函数, -α(1-yi)**γ *ce_loss(xi,yi)
-        步骤详细的实现了 focal_loss损失函数.
-        :param alpha:   阿尔法α,类别权重.      当α是列表时,为各类别权重,当α为常数时,类别权重为[α, 1-α, 1-α, ....],常用于 目标检测算法中抑制背景类 , retainnet中设置为0.25
-        :param gamma:   伽马γ,难易样本调节参数. retainnet中设置为2
-        :param num_classes:     类别数量
-        :param size_average:    损失计算方式,默认取均值
-        """
         super(focal_loss, self).__init__()
         self.size_average = size_average
         if isinstance(alpha, list):
@@ -119,12 +111,6 @@ class focal_loss(nn.Module):
         self.gamma = gamma
 
     def forward(self, preds, labels):
-        """
-        focal_loss损失计算
-        :param preds:   预测类别. size:[B,N,C] or [B,C]    分别对应与检测与分类任务, B 批次, N检测框数, C类别数
-        :param labels:  实际类别. size:[B,N] or [B]
-        :return:
-        """
         # assert preds.dim()==2 and labels.dim()==1
         preds = preds.view(-1, preds.size(-1))
         self.alpha = self.alpha.to(preds.device)
