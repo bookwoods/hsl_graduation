@@ -1,0 +1,5 @@
+dgl~=1.1.2.cu117
+transformers~=4.32.1
+ltp~=4.2.13
+torchmetrics~=1.1.1
+datasets~=2.12.0
