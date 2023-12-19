@@ -87,14 +87,6 @@ class MyModel(pl.LightningModule):
 
 class focal_loss(nn.Module):
     def __init__(self, alpha=0.1, gamma=2, num_classes=2, size_average=False):
-        """
-        focal_loss损失函数, -α(1-yi)**γ *ce_loss(xi,yi)
-        步骤详细的实现了 focal_loss损失函数.
-        :param alpha:   阿尔法α,类别权重.      当α是列表时,为各类别权重,当α为常数时,类别权重为[α, 1-α, 1-α, ....],常用于 目标检测算法中抑制背景类 , retainnet中设置为0.25
-        :param gamma:   伽马γ,难易样本调节参数. retainnet中设置为2
-        :param num_classes:     类别数量
-        :param size_average:    损失计算方式,默认取均值
-        """
         super(focal_loss, self).__init__()
         self.size_average = size_average
         if isinstance(alpha, list):
@@ -111,12 +103,6 @@ class focal_loss(nn.Module):
         self.gamma = gamma
 
     def forward(self, preds, labels):
-        """
-        focal_loss损失计算
-        :param preds:   预测类别. size:[B,N,C] or [B,C]    分别对应与检测与分类任务, B 批次, N检测框数, C类别数
-        :param labels:  实际类别. size:[B,N] or [B]
-        :return:
-        """
         # assert preds.dim()==2 and labels.dim()==1
         preds = preds.view(-1, preds.size(-1))
         self.alpha = self.alpha.to(preds.device)
@@ -137,8 +123,8 @@ class focal_loss(nn.Module):
         return loss
 
 
-def train(model_name, lr, drop, norm_way, train_dataset, val_dataset, test_dataset, num_layers):
-    log_name = f'{model_name}_lr{lr}_drop{drop}_{norm_way}_{num_layers}num_layers'
+def train(model_name, lr, drop, train_dataset, val_dataset, test_dataset, num_layers):
+    log_name = f'{model_name}_lr{lr}_drop{drop}_{num_layers}num_layers'
     logger = TensorBoardLogger(save_dir=hparams.save_log_path, name=log_name)
 
     checkpoint_callback = ModelCheckpoint(
@@ -159,7 +145,7 @@ def train(model_name, lr, drop, norm_way, train_dataset, val_dataset, test_datas
         precision=16,
         callbacks=[checkpoint_callback]
     )
-    model = MyModel(lr, drop, norm_way, train_dataset, val_dataset, test_dataset, num_layers)
+    model = MyModel(lr, drop, train_dataset, val_dataset, test_dataset, num_layers)
     trainer.fit(model)
 
 
@@ -180,16 +166,7 @@ if __name__ == "__main__":
     test_dataset = P2G_double(dataset["test"], hparams.pretrained_model, hparams.LTP, max_len)
     seed_everything(hparams.seed)
 
-    extra_config = {
-        "lr": [1e-5, 2e-5, 3e-5, 4e-5, 5e-5],
-        "dropout": [0.1, 0.2, 0.3, 0.4, 0.5],
-        "norm_way": ["BatchNorm", "LayerNorm"],
-        "num_layers": [2, 3, 4, 5, 6]
-    }
-
-    for lr in extra_config["lr"]:
-        for drop in extra_config["dropout"]:
-            for norm_way in extra_config["norm_way"]:
-                for num_layers in extra_config["num_layers"]:
-                    train(model_name, lr, drop, norm_way, train_dataset, val_dataset, test_dataset, num_layers)
-
+    lr = 1e-5
+    dropout = 0.1
+    num_layers = 3
+    train(model_name, lr, drop, train_dataset, val_dataset, test_dataset, num_layers)
