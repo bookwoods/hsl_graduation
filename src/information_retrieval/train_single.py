@@ -188,16 +188,9 @@ if __name__ == "__main__":
     test_dataset = P2G_single(dataset["test"], hparams.pretrained_model, hparams.LTP, max_len)
     seed_everything(hparams.seed)
 
-    extra_config = {
-        "lr": [1e-5, 2e-5, 3e-5, 4e-5, 5e-5],
-        "dropout": [0.1, 0.2, 0.3, 0.4, 0.5],
-        "norm_way": ["BatchNorm", "LayerNorm"],
-        "num_layers": [2, 3, 4, 5, 6]
-    }
-
-    for lr in extra_config["lr"]:
-        for drop in extra_config["dropout"]:
-            for norm_way in extra_config["norm_way"]:
-                for num_layers in extra_config["num_layers"]:
-                    train(model_name, lr, drop, norm_way, train_dataset, val_dataset, test_dataset, num_layers)
+    lr = 1e-5
+    dropout = 0.1
+    norm_way = BatchNorm
+    num_layers = 3
+    train(model_name, lr, drop, norm_way, train_dataset, val_dataset, test_dataset, num_layers)
 
